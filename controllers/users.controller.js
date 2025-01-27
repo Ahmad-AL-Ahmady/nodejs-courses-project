@@ -22,7 +22,7 @@ const getAllUsers = asyncWrapper(async (req, res) => {
 });
 
 const register = asyncWrapper(async (req, res, next) => {
-  const { firstName, lastName, email, password } = req.body;
+  const { firstName, lastName, email, password, role } = req.body;
 
   const oldUser = await User.findOne({ email: email });
 
@@ -43,11 +43,14 @@ const register = asyncWrapper(async (req, res, next) => {
     lastName,
     email,
     password: hashedPassword,
+    role,
+    avatar: req.file.filename,
   });
 
   const token = await generateJWT({
     email: newUser.email,
     id: newUser._id,
+    role: newUser.role,
   });
   newUser.token = token;
 
@@ -89,6 +92,7 @@ const login = asyncWrapper(async (req, res, next) => {
     const token = await generateJWT({
       email: user.email,
       id: user._id,
+      role: user.role,
     });
 
     return res.json({ status: httpStatusText.SUCCESS, data: { token } });
